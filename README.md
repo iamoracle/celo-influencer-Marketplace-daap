@@ -1,3 +1,16 @@
+Description.
+
+influencer market place is a Daap where influencers can advertise their audience to people for promotions. Any business owners can pay these influencers to promote a product for them.
+
+The email of each influencer will be hidden until the payment for the promotion is confirmed on the block chain
+
+
+Live Demo
+
+ https://4undraiser.github.io/celo-influencer-Marketplace-daap/
+
+
+
 # Install
 
 ```
