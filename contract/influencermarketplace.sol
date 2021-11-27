@@ -84,19 +84,17 @@ contract influencerMarketplace {
           ),
           "Transfer failed."
         );
-        influencers[_index].payed = true; // setting the payed value to true after payment is succesful
+        influencers[_index].payed = true;
     }
     // function to return the length of influencers
     function getInflencersLength() public view returns (uint) {
         return (influencersLength);
     }
     
-     // function to get the email of the influencer after transaction has been completed
+     // function to get the email of the influencer after transactio has been completed
     function getInfluencerEmail(uint _index)public view returns(string memory){
         if(influencers[_index].payed == true){
-            return (influencers[_index].email);
-        }else{
-            return "??";
-        }
+            return (influencers[_index].email);} else{return "Hire to view email";}
     }
+   
 }

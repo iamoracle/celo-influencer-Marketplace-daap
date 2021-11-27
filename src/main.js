@@ -6,7 +6,7 @@ import marketplaceAbi from '../contract/marketplace.abi.json'
 import erc20Abi from "../contract/erc20.abi.json"
 
 const ERC20_DECIMALS = 18
-const MPContractAddress = "0xf3D50F8f4565872566eD8a3cD0246Dd72c22de95"
+const MPContractAddress = "0x3b50D063e015F555140be07E224e4bD8A13A81aE"
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
 
 let kit
@@ -163,18 +163,17 @@ function identiconTemplate(_address) {
   .querySelector("#newInfluencerBtn")
   .addEventListener("click", async (e) => {
     const params = [
-        document.getElementById("newProductName").value,
+        document.getElementById("newInfluencerName").value,
         document.getElementById("newImgUrl").value,
-        document.getElementById("newProductDescription").value,
-        document.getElementById("newLocation").value,
+        document.getElementById("newAudienceDescription").value,
+        document.getElementById("newEmail").value,
         new BigNumber(document.getElementById("newPrice").value)
         .shiftedBy(ERC20_DECIMALS)
         .toString()
       ]
       notification(`⌛ Adding "${params[0]}"...`)
     try {
-      const result = await contract.methods
-        .writeInfluencerinfo(...params)
+      const result = await contract.methods.writeInfluencerinfo(...params)
         .send({ from: kit.defaultAccount })
     } catch (error) {
       notification(`⚠️ ${error}.`)
@@ -184,10 +183,10 @@ function identiconTemplate(_address) {
   })
 
 
-  
   document.querySelector("#marketplace").addEventListener("click", async(e) => {
     if(e.target.className.includes("buyBtn")) {
       const index = e.target.id
+      notification("⌛ Waiting for payment approval...")
       try {
         await approve(influencers[index].price)
       } catch (error) {
