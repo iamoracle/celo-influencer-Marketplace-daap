@@ -87,7 +87,7 @@ contract influencerMarketplace {
         influencers[_index].payed = true;
     }
     // function to return the length of influencers
-    function getInflencersLength() public view returns (uint) {
+    function getInfluencersLength() public view returns (uint) {
         return (influencersLength);
     }
     
