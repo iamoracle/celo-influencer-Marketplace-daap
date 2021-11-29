@@ -9,9 +9,9 @@ const ERC20_DECIMALS = 18
 const MPContractAddress = "0x3b50D063e015F555140be07E224e4bD8A13A81aE"
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
 
-let kit
-let contract
-let influencers = []
+let kit;
+let contract;
+let influencers = [];
 
 
 const connectCeloWallet = async function () {
@@ -49,54 +49,73 @@ const connectCeloWallet = async function () {
     document.querySelector("#balance").textContent = cUSDBalance
   }
 
+  document.querySelector("#newInfluencerBtn").addEventListener("click", async (e) => {
+    const params = [
+        document.getElementById("newInfluencerName").value,
+        document.getElementById("newImgUrl").value,
+        document.getElementById("newAudienceDescription").value,
+        document.getElementById("newEmail").value,
+        new BigNumber(document.getElementById("newPrice").value)
+        .shiftedBy(ERC20_DECIMALS)
+        .toString()
+      ];
+      notification(`⌛ Adding "${params[0]}"...`)
+    try {
+      const result = await contract.methods.writeInfluencerinfo(...params)
+        .send({ from: kit.defaultAccount })
+    } catch (error) {
+      notification(`⚠️ ${error}.`)
+    }
+    notification(`🎉 You successfully added "${params[0]}".`)
+    getInfluencers()
+  })
+
   const getInfluencers = async function() {
     const _influencersLength = await contract.methods.getInfluencersLength().call()
     const _influencers = []
 
     for (let i = 0; i < _influencersLength; i++) {
         let _influencer = new Promise(async (resolve, reject) => {
-          let p = await contract.methods.readInfluencerinfo(i).call()
+          let inf = await contract.methods.readInfluencerinfo(i).call()
           resolve({
             index: i,
-            owner: p[0],
-            name: p[1],
-            image: p[2],
-            description: p[3],
-            email: p[4],
-            price: new BigNumber(p[5]),
-            payed: p[6]
-          })
-        })
-        _influencers.push(_influencer)
+            owner: inf[0],
+            name: inf[1],
+            image: inf[2],
+            description: inf[3],
+            email: inf[4],
+            price: new BigNumber(inf[5]),
+          });
+        });
+        _influencers.push(_influencer);
       }
-      influencers = await Promise.all(_influencers)
-      renderInfluencers()
-    }
+      influencers = await Promise.all(_influencers);
+      renderInfluencers();
+    };
 
 
   function renderInfluencers() {
     document.getElementById("marketplace").innerHTML = ""
     influencers.forEach((_influencer) => {
-      const newDiv = document.createElement("div")
-      newDiv.className = "col-md-4"
-      newDiv.innerHTML = influencerTemplate(_influencer)
+      const newDiv = document.createElement("div");
+      newDiv.className = "col-md-4";
+      newDiv.innerHTML = `
+            ${influencerTemplate(_influencer)}   <div class="imageTemplates"></div>`;
       document.getElementById("marketplace").appendChild(newDiv)
-    })
+    });
   }
 
 
   // function to only show the email address of the influencer when payed is true which is when the payment has been confirmed as seen on the smart contract.
-function showEmail(){
-  if (_influencer[index].payed == true){
-    return _influencer[index].email
-  }else{
-    return "Buy promotion to view email"
-  }
+const showEmail = async function (){
+  const influencerEmail = await contract.methods.getInfluencerEmail(_influencer.index).call();
+  return influencerEmail
+  
 }
 
   function influencerTemplate(_influencer) {
     return `
-      <div class="card mb-4">
+      <div class="card mb-4 mx-2 imageTemplate">
         <img class="card-img-top" src="${_influencer.image}" alt="...">
         <div class="card-body text-left p-4 position-relative">
         <div class="translate-middle-y position-absolute top-0">
@@ -150,37 +169,10 @@ function identiconTemplate(_address) {
     document.querySelector(".alert").style.display = "none"
   }
 
-  window.addEventListener("load", async() => {
-    notification("⌛ Loading...")
-    await connectCeloWallet()
-    await getBalance()
-    await getInfluencers()
-    notificationOff()
-  })
+  
 
 
-  document
-  .querySelector("#newInfluencerBtn")
-  .addEventListener("click", async (e) => {
-    const params = [
-        document.getElementById("newInfluencerName").value,
-        document.getElementById("newImgUrl").value,
-        document.getElementById("newAudienceDescription").value,
-        document.getElementById("newEmail").value,
-        new BigNumber(document.getElementById("newPrice").value)
-        .shiftedBy(ERC20_DECIMALS)
-        .toString()
-      ]
-      notification(`⌛ Adding "${params[0]}"...`)
-    try {
-      const result = await contract.methods.writeInfluencerinfo(...params)
-        .send({ from: kit.defaultAccount })
-    } catch (error) {
-      notification(`⚠️ ${error}.`)
-    }
-    notification(`🎉 You successfully added "${params[0]}".`)
-    getInfluencers()
-  })
+  
 
 
   document.querySelector("#marketplace").addEventListener("click", async(e) => {
@@ -205,3 +197,11 @@ function identiconTemplate(_address) {
     }
   }
 })  
+
+window.addEventListener("load", async() => {
+  notification("⌛ Loading...");
+  await connectCeloWallet();
+  await getBalance();
+  await getInfluencers();
+  notificationOff();
+});
